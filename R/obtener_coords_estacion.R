@@ -11,7 +11,7 @@ obtener_coords_estacion <- function(nombre_estacion) {
 
   norm_nombre_estacion <- tolower(iconv(nombre_estacion, to = "ASCII//TRANSLIT"))
 
-  archivo_datos <- system.file("extdata", "estaciones.csv", package = "grib2nc")
+  archivo_datos <- system.file("extdata", "estaciones.csv", package = "iconDWD")
 
   if (!file.exists(archivo_datos)) {
     stop("Archivo de datos de estaciones meteorológicas no encontrado.")

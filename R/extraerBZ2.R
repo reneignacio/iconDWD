@@ -42,14 +42,14 @@ extraerBZ2 <- function(rutas, parallel = FALSE, ncores = detectCores() - 1) {
     clusterEvalQ(cl, {
       library(glue)
       library(R.utils)
-      library(grib2nc)
+      library(iconDWD)
       library(doSNOW)
       library(doParallel)
       library(foreach)
     })
 
     # Ejecución paralela
-    resultados <- foreach(ruta = rutas, .packages = c("glue", "R.utils","grib2nc","doParallel","doSNOW","foreach")) %dopar% {
+    resultados <- foreach(ruta = rutas, .packages = c("glue", "R.utils","iconDWD","doParallel","doSNOW","foreach")) %dopar% {
       if(file.exists(ruta)) {
         bunzip2(ruta, overwrite = TRUE)
         return(glue("Archivo {ruta} extraído.\n"))
