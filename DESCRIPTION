@@ -1,0 +1,25 @@
+Package: grib2nc
+Type: Package
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Author: Rene Sepulveda <reneignaciosepulvedajara@gmail.com>
+Maintainer: Rene Sepulveda <reneignaciosepulvedajara@gmail.com>
+Description: More about what it does (maybe more than one line)
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    glue,
+    doSNOW,
+    doParallel,
+    R.utils,
+    foreach,
+	pbapply,
+	stringdist,
+	readr,
+	jsonlite,
+	httr,
+	terra
+RoxygenNote: 7.3.1
+Suggests:
+    testthat (>= 3.0.0)
+Roxygen: list(markdown = TRUE)
