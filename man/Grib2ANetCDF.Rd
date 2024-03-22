@@ -6,7 +6,6 @@
 \usage{
 Grib2ANetCDF(
   ruta_in,
-  ruta_out,
   ruta_script,
   parallel = FALSE,
   ncores = detectCores() - 3,
@@ -15,8 +14,6 @@ Grib2ANetCDF(
 }
 \arguments{
 \item{ruta_in}{Vector de caracteres con las rutas de los archivos de entrada .grib2.}
-
-\item{ruta_out}{Vector de caracteres con las rutas de destino para los archivos .nc.}
 
 \item{ruta_script}{Ruta del script dentro de wsl("/home/...")}
 
@@ -48,7 +45,6 @@ larga duración.
 \examples{
 \dontrun{
 ruta_in <- c("/path/to/input/file1.grib2", "/path/to/input/file2.grib2")
-ruta_out <- c("/path/to/output/file1.nc", "/path/to/output/file2.nc")
 ruta_script_wsl <- "/home/inia/ICON_0125/transform_0125.sh"
 Grib2ANetCDF(ruta_in, ruta_out, ruta_script, parallel = TRUE, verbose = TRUE)
 }

@@ -5,7 +5,6 @@
 #' operar en modo secuencial o paralelo.
 #'
 #' @param ruta_in Vector de caracteres con las rutas de los archivos de entrada .grib2.
-#' @param ruta_out Vector de caracteres con las rutas de destino para los archivos .nc.
 #' @param ruta_script Ruta del script dentro de wsl("/home/...")
 #' @param parallel Lógico, indica si la conversión debe realizarse en paralelo. Por defecto es `FALSE`.
 #' @param ncores Entero, número de núcleos a utilizar para la conversión en paralelo. Solo aplica si `parallel` es `TRUE`. Por defecto, usa todos los núcleos disponibles menos uno.
@@ -28,7 +27,6 @@
 #' @examples
 #' \dontrun{
 #' ruta_in <- c("/path/to/input/file1.grib2", "/path/to/input/file2.grib2")
-#' ruta_out <- c("/path/to/output/file1.nc", "/path/to/output/file2.nc")
 #' ruta_script_wsl <- "/home/inia/ICON_0125/transform_0125.sh"
 #' Grib2ANetCDF(ruta_in, ruta_out, ruta_script, parallel = TRUE, verbose = TRUE)
 #' }
@@ -39,7 +37,15 @@
 #' @import pbapply
 #' @import R.utils
 
-Grib2ANetCDF <- function(ruta_in, ruta_out,ruta_script, parallel = FALSE, ncores = detectCores() - 3, verbose = TRUE) {
+Grib2ANetCDF <- function(ruta_in,ruta_script, parallel = FALSE, ncores = detectCores() - 3, verbose = TRUE) {
+
+  generarRutaSalida <- function(ruta) {
+    # Asumimos la estructura de directorios y cambiamos la extensión de .grib2 a .nc
+    ruta_salida <- sub("\\.grib2$", ".nc", ruta)
+    return(ruta_salida)
+  }
+
+  ruta_out <<- sapply(ruta_in, generarRutaSalida, USE.NAMES = FALSE)
 
   modificarRutaSalida <- function(ruta) {
     separador <- .Platform$file.sep# Usar un separador adecuado para Windows
@@ -56,11 +62,8 @@ Grib2ANetCDF <- function(ruta_in, ruta_out,ruta_script, parallel = FALSE, ncores
   }
 
 
-
-
   tiempo_inicio <- Sys.time() # Para estimar el tiempo total
   ruta_in<<-ruta_in
-  ruta_out<<-ruta_out
   ruta_script<<-ruta_script
   ruta_base_script<<- dirname(ruta_script)
 
@@ -88,7 +91,7 @@ Grib2ANetCDF <- function(ruta_in, ruta_out,ruta_script, parallel = FALSE, ncores
     registerDoSNOW(cl)
 
     # En el modo paralelo, asegúrate de exportar correctamente la variable ruta_script
-    clusterExport(cl, varlist = c("convertirRutaWindowsAWSL", "glue","ruta_base_script"))
+    clusterExport(cl, varlist = c("convertirRutaWindowsAWSL", "glue","ruta_base_script","ruta_out"))
 
 
     clusterEvalQ(cl, {

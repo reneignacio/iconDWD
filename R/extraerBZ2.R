@@ -57,10 +57,10 @@ extraerBZ2 <- function(rutas, parallel = FALSE, ncores = detectCores() - 1) {
         return(glue("El archivo {ruta} no existe.\n"))
       }
     }
-    cat(paste(resultados, collapse = ""))
+    #cat(paste(resultados, collapse = ""))
 
     stopCluster(cl)
 
   }
-  close()
+
 }
