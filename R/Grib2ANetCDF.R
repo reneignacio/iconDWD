@@ -120,6 +120,5 @@ Grib2ANetCDF <- function(ruta_in,ruta_script, parallel = FALSE, ncores = detectC
   tiempo_fin <- Sys.time() # Tiempo final
   tiempo_total <- tiempo_fin - tiempo_inicio # Calcular el tiempo total de ejecución
   if (verbose) cat(glue("Tiempo total de ejecución: {round(tiempo_total, 2)} segundos\n"))
-  close()
 }
 
