@@ -4,7 +4,7 @@
 \alias{extraer_valores_icon}
 \title{Extraer Valores y Fechas de un SpatRaster para Ubicaciones Específicas}
 \usage{
-extraer_valores_icon(spatraster, coords, fun = NULL, touches = FALSE, ...)
+extraer_valores_icon(spatraster, coords, ...)
 }
 \arguments{
 \item{spatraster}{El objeto SpatRaster del cual se extraerán los valores.}
@@ -12,11 +12,11 @@ extraer_valores_icon(spatraster, coords, fun = NULL, touches = FALSE, ...)
 \item{coords}{Coordenadas de la localización para la extracción, que pueden ser un punto (matrix o data.frame con
 columnas x, y) o un SpatVector (puntos, líneas, polígonos).}
 
+\item{...}{Argumentos adicionales para la función \code{extract}.}
+
 \item{fun}{(Opcional) Función para resumir los datos extraídos por línea o geometría de polígono.}
 
 \item{touches}{(Opcional) Lógico, si TRUE, se extraen valores para todas las celdas tocadas por líneas o polígonos.}
-
-\item{...}{Argumentos adicionales para la función \code{extract}.}
 }
 \value{
 Un dataframe con dos columnas: Fecha y Valor, representando las fechas de cada capa

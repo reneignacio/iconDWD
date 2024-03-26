@@ -20,34 +20,38 @@
 #' print(valores_y_fechas)
 #'
 #' @export
-extraer_valores_icon <- function(spatraster, coords, fun = NULL, touches = FALSE, ...) {
+#'
+extraer_valores_icon <- function(spatraster, coords, ...) {
   # Asegurarse de que terra está cargado
   if (!requireNamespace("terra", quietly = TRUE)) {
     stop("El paquete 'terra' es necesario para esta función.")
   }
 
-  # Extraer los valores junto con las fechas, pasando argumentos adicionales
-  valores_y_fechas <- terra::extract(spatraster, coords, fun = fun, touches = touches, ...)
+  # Recolectar todos los argumentos adicionales en una lista
+  args_list <- list(...)
 
-  # Si fun no es NULL, los valores ya estarán resumidos y no habrá necesidad de transponer
-  if (!is.null(fun)) {
+  # Añadir 'spatraster' y 'coords' a la lista de argumentos
+  args_list$x <- spatraster
+  args_list$y <- coords
+
+  # Llamar a terra::extract pasando dinámicamente los argumentos
+  valores_y_fechas <- do.call(terra::extract, args_list)
+
+  # Realizar el procesamiento para formatear los resultados
+  # Nota: El siguiente código puede necesitar ajustes basado en la estructura exacta de 'valores_y_fechas'
+  if (!is.null(args_list$fun)) {
     df_valores_y_fechas <- as.data.frame(valores_y_fechas)
   } else {
-    # Convertir a data.frame y transponer si fun es NULL
     df_valores_y_fechas <- as.data.frame(t(valores_y_fechas))
   }
 
-  # Obtener las fechas del SpatRaster
+  # Asociar fechas a los datos extraídos, si aplica
   fechas <- terra::time(spatraster)
-
-  # Calcular el número de filas esperado en el df final, basado en si hay resumen o no
-  num_filas <- if (!is.null(fun)) length(valores_y_fechas) else nrow(df_valores_y_fechas)
-
-  # Añadir las fechas al dataframe
+  num_filas <- if (!is.null(args_list$fun)) length(valores_y_fechas) else nrow(df_valores_y_fechas)
   df_valores_y_fechas$FechaHora <- rep(fechas, each = num_filas / length(fechas))
 
   # Crear el dataframe final
-  if (!is.null(fun)) {
+  if (!is.null(args_list$fun)) {
     df_final <- data.frame(Fecha = df_valores_y_fechas$FechaHora, Valor = df_valores_y_fechas$layer.1)
   } else {
     df_final <- data.frame(Fecha = df_valores_y_fechas$FechaHora, Valor = df_valores_y_fechas$V1)

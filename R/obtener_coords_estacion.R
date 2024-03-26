@@ -7,8 +7,8 @@
 #' @importFrom readr read_csv
 #' @importFrom stringdist stringdist
 #' @export
-obtener_coords_estacion <- function(nombre_estacion) {
 
+obtener_coords_estacion <- function(nombre_estacion) {
   norm_nombre_estacion <- tolower(iconv(nombre_estacion, to = "ASCII//TRANSLIT"))
 
   archivo_datos <- system.file("extdata", "estaciones.csv", package = "iconDWD")
@@ -17,7 +17,7 @@ obtener_coords_estacion <- function(nombre_estacion) {
     stop("Archivo de datos de estaciones meteorológicas no encontrado.")
   }
 
-  datos_estaciones <- read_csv(archivo_datos, show_col_types = FALSE)
+  datos_estaciones <- readr::read_csv(archivo_datos, show_col_types = FALSE)
 
   datos_estaciones$nombre_norm <- tolower(iconv(datos_estaciones$nombre, to = "ASCII//TRANSLIT"))
 
@@ -36,13 +36,17 @@ obtener_coords_estacion <- function(nombre_estacion) {
   }
 
   estacion <- datos_estaciones[indice_min_dist, ]
-  lat <- estacion$latitud
-  lon <- estacion$longitud
 
-  # Mensaje de salida con el nombre, comuna y código de la estación
-  mensaje <- sprintf("Coordenadas para '%s' (%s, %s): [%f, %f]",
-                     estacion$nombre, estacion$comuna, estacion$codigo, lat, lon)
-  print(mensaje)
+  # Crear un data.frame para hacer un SpatVector de puntos
+  df_puntos <- data.frame(lon = estacion$longitud, lat = estacion$latitud)
 
-  return(matrix(c(lon, lat), ncol = 2))
+  # Crear el SpatVector de puntos
+  puntos <- vect(df_puntos, geom = c("lon", "lat"), crs = "+proj=longlat +datum=WGS84")
+
+  # Añadir el resto de atributos al SpatVector
+  for (nombre in names(estacion)) {
+    puntos[[nombre]] <- estacion[[nombre]]
+  }
+
+  return(puntos)
 }
