@@ -17,33 +17,32 @@ Grib2ANetCDF(ruta_in = rutas_grib2, parallel = T,verbose = F,ruta_script = ruta_
 
 
 
-#dir<-"D:/INIA/ICON/prueba_2/20240319/18/NetCDF/"
-dir<-"E:/ICON/20240319/18/NetCDF"
+dir<-"D:/INIA/ICON/prueba_2/20240319/18/NetCDF/"
+#dir<-"E:/ICON/20240319/18/NetCDF"
 
 dir_files<-FiltrarVariable(dir,variable = "TOT_PREC")
 icon_18<-rast(dir_files)
 
 
-
-
 nuble<-vect("D:/crop/comunas/R16.shp")
 nuble<-project(nuble,icon_18)
+
 icon_nuble<-crop(icon_18,nuble,mask=T)
 plot(icon_nuble)
 
-icon_nuble_r <- disagg(icon_nuble, fact=2, method="bilinear")
-
-inicio <- ymd_hms("2024-03-19 21:00:00")
-fin <- ymd_hms("2024-03-20 21:00:00")
-
 raster<-icon_nuble
-raster <- raster[[time(raster) >= inicio & time(raster) <= fin]]
+inicio <- ymd_hm("2024-03-20 00:00")
+fin <- ymd_hm("2024-03-21 00:00")
+raster_subset <- raster[[time(raster)-hours(3) >= inicio & time(raster)-hours(3) <= fin]]
+
+plet(raster_subset[[length(time(raster_subset))]],tiles="Streets")
 
 chillan<-subset(nuble,nuble$nom_com=="Chillán" )
 
 values(nuble)
 
-
+library(readr)
+library(dplyr)
 # Obtener todas las estaciones de la región "Coquimbo"
 estaciones_coquimbo <- coordenadas_estaciones(region = "Coquimbo")
 plot(estaciones_coquimbo)
@@ -57,29 +56,15 @@ a<-coordenadas_estaciones(institucion = "INIA",region = "Ñuble")
 plet(a)
 
 
-
-
-coords_estacion <- obtener_coords_estacion(nombre_estacion ="Ce arroz")
-coords_estacion<- coordenadas_estaciones()
-coords_estacion[coords_estacion$region=="Coquimbo"]
-
-plot(nuble[,7])
-
-
+#si a viene de la funcion coordenadas_estaciones entonces se deberia hacer esto:
 resultado<-terra::extract(raster,a,ID=F)
 resultado
 resultado<-t(resultado)
 resultado
 colnames(resultado)<-a$nombre
 resultado
-fechas<-time(raster)
-
+fechas<-time(raster) - hours(4)
 df_final<-data.frame(fechas,resultado)
-
-
-
-
-
 
 
 
