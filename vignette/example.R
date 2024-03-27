@@ -16,9 +16,15 @@ Grib2ANetCDF(ruta_in = rutas_grib2, parallel = T,verbose = F,ruta_script = ruta_
 
 
 
-dir<-"D:/INIA/ICON/prueba_2/20240319/18/NetCDF/"
+
+#dir<-"D:/INIA/ICON/prueba_2/20240319/18/NetCDF/"
+dir<-"E:/ICON/20240319/18/NetCDF"
+
 dir_files<-FiltrarVariable(dir,variable = "TOT_PREC")
 icon_18<-rast(dir_files)
+
+
+
 
 nuble<-vect("D:/crop/comunas/R16.shp")
 nuble<-project(nuble,icon_18)

@@ -22,8 +22,7 @@
 #' @importFrom lubridate ymd_hms
 #' @importFrom dplyr filter
 FiltrarVariable <- function(dir, fecha_inicial = NA, fecha_final = NA, variable) {
-  require(lubridate)
-  require(dplyr)
+
 
   # Diccionario para relacionar nombre corto de la variable con nombre largo
   diccionario_variables <- list(
