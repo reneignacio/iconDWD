@@ -1,9 +1,9 @@
 #' Buscar y filtrar estaciones meteorológicas
 #'
 #' Esta función permite buscar y filtrar estaciones meteorológicas basándose en criterios
-#' como región, comuna, fecha de inicio de operaciones e institución. Retorna un objeto
-#' `SpatVector` con las coordenadas geográficas y atributos de las estaciones que cumplen
-#' con los criterios especificados.
+#' como región, comuna, fecha de inicio de operaciones, institución y nombre de estación.
+#' Retorna un objeto `SpatVector` con las coordenadas geográficas y atributos de las estaciones
+#' que cumplen con los criterios especificados.
 #'
 #' @param region El nombre de la región donde buscar las estaciones meteorológicas.
 #' Si se especifica `NULL` (valor por defecto), no se filtra por región.
@@ -13,9 +13,13 @@
 #' Si se especifica `NULL` (valor por defecto), no se filtra por fecha de inicio.
 #' @param institucion Nombre de la institución a la que pertenece la estación meteorológica.
 #' Si se especifica `NULL` (valor por defecto), no se filtra por institución.
+#' @param nombre_estacion El nombre específico de la estación meteorológica a buscar.
+#' Si se especifica `NULL` (valor por defecto), no se filtra por nombre de estación.
 #'
 #' @return Un objeto `SpatVector` que contiene las coordenadas geográficas y atributos
-#' de las estaciones filtradas. Cada estación es un punto dentro del `SpatVector`.
+#' de las estaciones filtradas. Cada estación es un punto dentro del `SpatVector`, con
+#' información adicional como código, nombre, elevación, comuna, región y fecha de la
+#' primera lectura.
 #'
 #' @examples
 #' # Ejemplo de uso sin filtrar por ningún criterio
@@ -30,22 +34,27 @@
 #' # Ejemplo de uso filtrando por institución y fecha de inicio
 #' coordenadas_estaciones(institucion = "INIA", Inicio = ymd("2010-01-01"))
 #'
-#' @importFrom readr read_csv
-#' @importFrom dplyr filter
-#' @importFrom lubridate ymd_hm
+#' # Ejemplo de uso filtrando por el nombre de la estación
+#' coordenadas_estaciones(nombre_estacion = "Rapel")
+#'
+#' @import readr
+#' @import dplyr
+#' @import lubridate
 #' @importFrom stringdist amatch
 #' @importFrom terra vect
+
+
 #' @export
 
-coordenadas_estaciones <- function(region = NULL, comuna = NULL, Inicio = NULL, institucion = NULL) {
-  archivo_datos <- system.file("extdata", "estaciones_coninstitucion.csv", package = "iconDWD")
+coordenadas_estaciones <- function(region = NULL, comuna = NULL, Inicio = NULL, institucion = NULL, nombre_estacion = NULL) {
+  archivo_datos <- system.file("extdata", "estaciones.csv", package = "iconDWD")
 
   if (!file.exists(archivo_datos)) {
     stop("Archivo de datos de estaciones meteorológicas no encontrado.")
   }
 
   datos_estaciones <- read_csv(archivo_datos, col_types = cols(
-    institucion = col_character(),  # Asegúrate de que tu CSV tenga esta columna
+    institucion = col_character(),
     codigo = col_character(),
     nombre = col_character(),
     latitud = col_double(),
@@ -79,6 +88,10 @@ coordenadas_estaciones <- function(region = NULL, comuna = NULL, Inicio = NULL, 
     mensaje_filtro <- paste(mensaje_filtro, "de la institución", institucion)
   }
 
+  if (!is.null(nombre_estacion)) {
+    datos_estaciones <- datos_estaciones %>% filter(tolower(nombre) == tolower(nombre_estacion))
+    mensaje_filtro <- paste(mensaje_filtro, "con el nombre de estación", nombre_estacion)
+  }
 
   if (!is.null(Inicio)) {
     fecha_filtrada <- Inicio

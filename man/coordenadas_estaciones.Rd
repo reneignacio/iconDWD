@@ -8,7 +8,8 @@ coordenadas_estaciones(
   region = NULL,
   comuna = NULL,
   Inicio = NULL,
-  institucion = NULL
+  institucion = NULL,
+  nombre_estacion = NULL
 )
 }
 \arguments{
@@ -23,16 +24,21 @@ Si se especifica \code{NULL} (valor por defecto), no se filtra por fecha de inic
 
 \item{institucion}{Nombre de la institución a la que pertenece la estación meteorológica.
 Si se especifica \code{NULL} (valor por defecto), no se filtra por institución.}
+
+\item{nombre_estacion}{El nombre específico de la estación meteorológica a buscar.
+Si se especifica \code{NULL} (valor por defecto), no se filtra por nombre de estación.}
 }
 \value{
 Un objeto \code{SpatVector} que contiene las coordenadas geográficas y atributos
-de las estaciones filtradas. Cada estación es un punto dentro del \code{SpatVector}.
+de las estaciones filtradas. Cada estación es un punto dentro del \code{SpatVector}, con
+información adicional como código, nombre, elevación, comuna, región y fecha de la
+primera lectura.
 }
 \description{
 Esta función permite buscar y filtrar estaciones meteorológicas basándose en criterios
-como región, comuna, fecha de inicio de operaciones e institución. Retorna un objeto
-\code{SpatVector} con las coordenadas geográficas y atributos de las estaciones que cumplen
-con los criterios especificados.
+como región, comuna, fecha de inicio de operaciones, institución y nombre de estación.
+Retorna un objeto \code{SpatVector} con las coordenadas geográficas y atributos de las estaciones
+que cumplen con los criterios especificados.
 }
 \examples{
 # Ejemplo de uso sin filtrar por ningún criterio
@@ -46,5 +52,8 @@ coordenadas_estaciones(region = "Metropolitana", comuna = "Santiago")
 
 # Ejemplo de uso filtrando por institución y fecha de inicio
 coordenadas_estaciones(institucion = "INIA", Inicio = ymd("2010-01-01"))
+
+# Ejemplo de uso filtrando por el nombre de la estación
+coordenadas_estaciones(nombre_estacion = "Rapel")
 
 }
