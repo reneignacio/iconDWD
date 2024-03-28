@@ -41,6 +41,7 @@ Retorna un objeto \code{SpatVector} con las coordenadas geográficas y atributos
 que cumplen con los criterios especificados.
 }
 \examples{
+library(lubridate)
 # Ejemplo de uso sin filtrar por ningún criterio
 coordenadas_estaciones()
 

@@ -22,6 +22,7 @@
 #' primera lectura.
 #'
 #' @examples
+#' library(lubridate)
 #' # Ejemplo de uso sin filtrar por ningún criterio
 #' coordenadas_estaciones()
 #'
