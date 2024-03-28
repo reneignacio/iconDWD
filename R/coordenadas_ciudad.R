@@ -12,14 +12,14 @@
 #' @return Un objeto `matrix` con las coordenadas (longitud y latitud) de la localidad.
 #'
 #' @examples
-#' coords <- obtener_coords_nominatim("Los Angeles, Chile")
+#' coords <- coordenadas_ciudad("Los Angeles, Chile")
 #' print(coords)
 #'
 #' @export
 #'
 #' @import httr
-#' @import jsonlite
-obtener_coords_ciudad <- function(localidad) {
+#' @importFrom jsonlite fromJSON
+coordenadas_ciudad <- function(localidad) {
   # Define la URL base de la API de Nominatim
   base_url <- "https://nominatim.openstreetmap.org/search"
 
