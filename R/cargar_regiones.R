@@ -60,7 +60,7 @@ cargar_regiones <- function(regiones = NULL) {
     regiones_a_cargar <- unique(c(regiones_codigo_directo, names(nombres_regiones)[unique(unlist(indices))]))
 
     for (codigo_region in regiones_a_cargar) {
-      pattern <- paste0(codigo_region, "_simplificado\\.shp$")
+      pattern <- paste0(codigo_region, "\\.shp$")
       archivo_region <- files[grepl(pattern, files)]
       if (length(archivo_region) > 0) {
         message("Cargando región: ", codigo_region, " desde archivo: ", archivo_region)
