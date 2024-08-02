@@ -4,7 +4,7 @@ Title: iconDWD
 Version: 0.0.0.9000
 Author: Rene Sepulveda <reneignaciosepulvedajara@gmail.com>
 Maintainer: Rene Sepulveda <reneignaciosepulvedajara@gmail.com>
-Description: More about what it does (maybe more than one line)
+Description: This package provides tools for loading, processing, and visualizing data from the ICON model of the DWD.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
@@ -13,14 +13,14 @@ Imports:
     doParallel,
     R.utils,
     foreach,
-	pbapply,
-	stringdist,
-	readr,
-	jsonlite,
-	httr,
-	terra,
-	lubridate,
-	dplyr
+    pbapply,
+    stringdist,
+    readr,
+    jsonlite,
+    httr,
+    terra,
+    lubridate,
+    dplyr
 RoxygenNote: 7.3.1
 Suggests:
     testthat (>= 3.0.0)

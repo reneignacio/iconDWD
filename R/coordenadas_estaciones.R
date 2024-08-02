@@ -38,81 +38,74 @@
 #' # Ejemplo de uso filtrando por el nombre de la estación
 #' coordenadas_estaciones(nombre_estacion = "Rapel")
 #'
-#' @import readr
-#' @import dplyr
-#' @import lubridate
-#' @importFrom stringdist amatch
-#' @importFrom terra vect
-
-
 #' @export
 
 coordenadas_estaciones <- function(region = NULL, comuna = NULL, Inicio = NULL, institucion = NULL, nombre_estacion = NULL) {
-  archivo_datos <- system.file("extdata", "estaciones.csv", package = "iconDWD")
+  archivo_datos <- base::system.file("extdata", "estaciones.csv", package = "iconDWD")
 
-  if (!file.exists(archivo_datos)) {
-    stop("Archivo de datos de estaciones meteorológicas no encontrado.")
+  if (!base::file.exists(archivo_datos)) {
+    base::stop("Archivo de datos de estaciones meteorológicas no encontrado.")
   }
 
-  datos_estaciones <- read_csv(archivo_datos, col_types = cols(
-    institucion = col_character(),
-    codigo = col_character(),
-    nombre = col_character(),
-    latitud = col_double(),
-    longitud = col_double(),
-    elevacion = col_double(),
-    comuna = col_character(),
-    region = col_character(),
-    primera_lectura = col_character() # Leer como caracteres
+  datos_estaciones <- readr::read_csv(archivo_datos, col_types = readr::cols(
+    institucion = readr::col_character(),
+    codigo = readr::col_character(),
+    nombre = readr::col_character(),
+    latitud = readr::col_double(),
+    longitud = readr::col_double(),
+    elevacion = readr::col_double(),
+    comuna = readr::col_character(),
+    region = readr::col_character(),
+    primera_lectura = readr::col_character() # Leer como caracteres
   ))
 
   # Convertir 'primera_lectura' a POSIXct usando lubridate
-  datos_estaciones$primera_lectura <- ymd_hm(datos_estaciones$primera_lectura)
+  datos_estaciones$primera_lectura <- lubridate::ymd_hm(datos_estaciones$primera_lectura)
 
   mensaje_filtro <- "Estaciones encontradas"
 
   # Aplicar filtros
-  if (!is.null(region)) {
-    region_cercana <- datos_estaciones$region[amatch(tolower(region), tolower(datos_estaciones$region), maxDist = 5)]
-    datos_estaciones <- datos_estaciones %>% filter(region == region_cercana)
-    mensaje_filtro <- paste(mensaje_filtro, "en la región", region_cercana)
+  if (!base::is.null(region)) {
+    region_cercana <- datos_estaciones$region[stringdist::amatch(base::tolower(region), base::tolower(datos_estaciones$region), maxDist = 5)]
+    datos_estaciones <- dplyr::filter(datos_estaciones, region == region_cercana)
+    mensaje_filtro <- base::paste(mensaje_filtro, "en la región", region_cercana)
   }
 
-  if (!is.null(comuna)) {
-    comuna_cercana <- datos_estaciones$comuna[amatch(tolower(comuna), tolower(datos_estaciones$comuna), maxDist = 5)]
-    datos_estaciones <- datos_estaciones %>% filter(comuna == comuna_cercana)
-    mensaje_filtro <- paste(mensaje_filtro, "y la comuna", comuna_cercana)
+  if (!base::is.null(comuna)) {
+    comuna_cercana <- datos_estaciones$comuna[stringdist::amatch(base::tolower(comuna), base::tolower(datos_estaciones$comuna), maxDist = 5)]
+    datos_estaciones <- dplyr::filter(datos_estaciones, comuna == comuna_cercana)
+    mensaje_filtro <- base::paste(mensaje_filtro, "y la comuna", comuna_cercana)
   }
 
-  if (!is.null(institucion)) {
-    datos_estaciones <- datos_estaciones %>% filter(tolower({{institucion}}) == tolower(institucion))
-    mensaje_filtro <- paste(mensaje_filtro, "de la institución", institucion)
+  if (!base::is.null(institucion)) {
+    datos_estaciones <- dplyr::filter(datos_estaciones, base::tolower(institucion) == base::tolower(institucion))
+    mensaje_filtro <- base::paste(mensaje_filtro, "de la institución", institucion)
   }
 
-  if (!is.null(nombre_estacion)) {
-    datos_estaciones <- datos_estaciones %>% filter(tolower(nombre) == tolower(nombre_estacion))
-    mensaje_filtro <- paste(mensaje_filtro, "con el nombre de estación", nombre_estacion)
+  if (!base::is.null(nombre_estacion)) {
+    datos_estaciones <- dplyr::filter(datos_estaciones, base::tolower(nombre) == base::tolower(nombre_estacion))
+    mensaje_filtro <- base::paste(mensaje_filtro, "con el nombre de estación", nombre_estacion)
   }
 
-  if (!is.null(Inicio)) {
+  if (!base::is.null(Inicio)) {
     fecha_filtrada <- Inicio
-    if (!inherits(fecha_filtrada, "Date") && !inherits(fecha_filtrada, "POSIXt")) {
-      fecha_filtrada <- ymd_hm(fecha_filtrada)
+    if (!base::inherits(fecha_filtrada, "Date") && !base::inherits(fecha_filtrada, "POSIXt")) {
+      fecha_filtrada <- lubridate::ymd_hm(fecha_filtrada)
     }
-    datos_estaciones <- datos_estaciones %>% filter(primera_lectura >= fecha_filtrada)
-    mensaje_filtro <- paste(mensaje_filtro, "con inicio de funcionamiento después de", format(fecha_filtrada, "%Y-%m-%d %H:%M"))
+    datos_estaciones <- dplyr::filter(datos_estaciones, primera_lectura >= fecha_filtrada)
+    mensaje_filtro <- base::paste(mensaje_filtro, "con inicio de funcionamiento después de", base::format(fecha_filtrada, "%Y-%m-%d %H:%M"))
   }
 
   # Crear el SpatVector con los puntos filtrados
-  puntos <- vect(datos_estaciones, geom = c("longitud", "latitud"), crs = "+proj=longlat +datum=WGS84")
+  puntos <- terra::vect(datos_estaciones, geom = c("longitud", "latitud"), crs = "+proj=longlat +datum=WGS84")
 
   # Añadir atributos al SpatVector
-  for (col_name in names(datos_estaciones)) {
+  for (col_name in base::names(datos_estaciones)) {
     puntos[[col_name]] <- datos_estaciones[[col_name]]
   }
 
   # Imprimir el mensaje con la cantidad de estaciones encontradas
-  cat(nrow(datos_estaciones), mensaje_filtro, "\n")
+  base::cat(base::nrow(datos_estaciones), mensaje_filtro, "\n")
 
   return(puntos)
 }

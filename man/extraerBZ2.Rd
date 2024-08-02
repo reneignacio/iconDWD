@@ -4,7 +4,7 @@
 \alias{extraerBZ2}
 \title{Extraer archivos .bz2 en paralelo o secuencialmente}
 \usage{
-extraerBZ2(rutas, parallel = FALSE, ncores = detectCores() - 1)
+extraerBZ2(rutas, parallel = FALSE, ncores = parallel::detectCores() - 1)
 }
 \arguments{
 \item{rutas}{Vector de rutas completas a los archivos .bz2 que se desean extraer.}

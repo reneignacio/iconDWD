@@ -28,7 +28,7 @@
 #' \dontrun{
 #' ruta_in <- c("/path/to/input/file1.grib2", "/path/to/input/file2.grib2")
 #' ruta_script_wsl <- "/home/inia/ICON_0125/transform_0125.sh"
-#' Grib2ANetCDF(ruta_in, ruta_out, ruta_script, parallel = TRUE, verbose = TRUE)
+#' Grib2ANetCDF(ruta_in, ruta_script, parallel = TRUE, verbose = TRUE)
 #' }
 #'
 #' @export
@@ -37,88 +37,106 @@
 #' @import pbapply
 #' @import R.utils
 
-Grib2ANetCDF <- function(ruta_in,ruta_script, parallel = FALSE, ncores = detectCores() - 3, verbose = TRUE) {
+Grib2ANetCDF <- function(ruta_in, ruta_script, parallel = FALSE, ncores = parallel::detectCores() - 3, verbose = TRUE) {
 
   generarRutaSalida <- function(ruta) {
-    # Asumimos la estructura de directorios y cambiamos la extensión de .grib2 a .nc
     ruta_salida <- sub("\\.grib2$", ".nc", ruta)
     return(ruta_salida)
   }
 
-  ruta_out <<- sapply(ruta_in, generarRutaSalida, USE.NAMES = FALSE)
-
   modificarRutaSalida <- function(ruta) {
-    separador <- .Platform$file.sep# Usar un separador adecuado para Windows
-    partes <- unlist(strsplit(ruta, separador, fixed = TRUE))
-    longitud <- length(partes)
-    ruta_dir_padre <- do.call(file.path, as.list(partes[1:(longitud - 1)]))# Reconstruir la ruta hasta el directorio padre del archivo final
-    ruta_dir_padre_netCDF <- file.path(ruta_dir_padre, "NetCDF")# Añadir "NetCDF" al directorio padre
-    if (!dir.exists(ruta_dir_padre_netCDF)) {# Crear el directorio "NetCDF" si no existe
-      dir.create(ruta_dir_padre_netCDF, recursive = TRUE, showWarnings = TRUE)
+    separador <- .Platform$file.sep
+    partes <- base::unlist(base::strsplit(ruta, separador, fixed = TRUE))
+    longitud <- base::length(partes)
+    ruta_dir_padre <- base::do.call(base::file.path, as.list(partes[1:(longitud - 1)]))
+    ruta_dir_padre_netCDF <- base::file.path(ruta_dir_padre, "NetCDF")
+    if (!base::dir.exists(ruta_dir_padre_netCDF)) {
+      base::dir.create(ruta_dir_padre_netCDF, recursive = TRUE, showWarnings = TRUE)
     }
-    ruta_modificada <- file.path(ruta_dir_padre_netCDF, partes[longitud])# Construir la ruta modificada con "NetCDF" incluido
-    cat("Ruta modificada:", ruta_modificada, "\n")    # Imprimir la ruta completa modificada
+    ruta_modificada <- base::file.path(ruta_dir_padre_netCDF, partes[longitud])
     return(ruta_modificada)
   }
 
-
-  tiempo_inicio <- Sys.time() # Para estimar el tiempo total
-  ruta_in<<-ruta_in
-  ruta_script<<-ruta_script
-  ruta_base_script<<- dirname(ruta_script)
-
-  if (!parallel) {
-    if (verbose) cat(glue("Iniciando la conversión de {length(ruta_in)} archivo(s) de .grib2 a .nc...\n"))
-
-    for (i in seq_along(ruta_in)) {
-      if (verbose) cat(glue("Procesando {ruta_in[i]}...\n"))
-
-      rutaWSL_in <- convertirRutaWindowsAWSL(ruta_in[i])
-      ruta_out_modificada <- modificarRutaSalida(ruta_out[i])
-      rutaWSL_out <- convertirRutaWindowsAWSL(ruta_out_modificada)
-      comando <- glue("wsl bash -c ' {ruta_script} {rutaWSL_in} {rutaWSL_out} {ruta_base_script} '")
-      system(comando)
-
-      # Actualizar al usuario sobre el progreso sin usar pbapply
-      if (verbose) cat(glue("Progreso: {i}/{length(ruta_in)}\n"))
-    }
-    if (verbose) cat("Conversión completada.\n")
+  # Verificar si hay archivos en ruta_in
+  if (base::length(ruta_in) == 0) {
+    base::stop("No hay archivos .grib2 para procesar.")
   }
 
-  else {  #PARALELO
-    if (verbose) cat(glue("Iniciando la conversión paralela de {length(ruta_in)} archivo(s) de .grib2 a .nc utilizando {ncores} núcleos...\n"))
-    cl <- makeCluster(ncores, type = "SOCK")
-    registerDoSNOW(cl)
+  ruta_out <<- base::sapply(ruta_in, generarRutaSalida, USE.NAMES = FALSE)
+  ruta_out_modificada <<- base::sapply(ruta_out, modificarRutaSalida, USE.NAMES = FALSE)
 
-    # En el modo paralelo, asegúrate de exportar correctamente la variable ruta_script
-    clusterExport(cl, varlist = c("convertirRutaWindowsAWSL", "glue","ruta_base_script","ruta_out"))
+  # Debug print
+  base::print("Rutas de salida generadas:")
+  base::print(ruta_out)
+  base::print("Rutas de salida modificadas:")
+  base::print(ruta_out_modificada)
 
+  archivos_existentes <- base::file.exists(ruta_out_modificada)
 
-    clusterEvalQ(cl, {
+  # Debug print
+  base::print("Archivos existentes:")
+  base::print(archivos_existentes)
+
+  ruta_in <<- ruta_in[!archivos_existentes]
+  ruta_out_modificada <<- ruta_out_modificada[!archivos_existentes]
+
+  # Debug print
+  base::print("Rutas de entrada después de filtrar archivos existentes:")
+  base::print(ruta_in)
+  base::print("Rutas de salida modificadas después de filtrar archivos existentes:")
+  base::print(ruta_out_modificada)
+
+  if (base::length(ruta_in) == 0) {
+    if (verbose) base::cat("No hay archivos nuevos para procesar.\n")
+    return()
+  }
+
+  tiempo_inicio <- base::Sys.time()
+  ruta_base_script <<- base::dirname(ruta_script)
+  ruta_script <<- ruta_script
+
+  if (!parallel) {
+    if (verbose) base::cat(glue::glue("Iniciando la conversión de {base::length(ruta_in)} archivo(s) de .grib2 a .nc...\n"))
+
+    for (i in base::seq_along(ruta_in)) {
+      if (verbose) base::cat(glue::glue("Procesando {ruta_in[i]}...\n"))
+
+      rutaWSL_in <- convertirRutaWindowsAWSL(ruta_in[i])
+      rutaWSL_out <- convertirRutaWindowsAWSL(ruta_out_modificada[i])
+      comando <- glue::glue("wsl bash -c ' {ruta_script} {rutaWSL_in} {rutaWSL_out} {ruta_base_script} '")
+      base::system(comando)
+
+      if (verbose) base::cat(glue::glue("Progreso: {i}/{base::length(ruta_in)}\n"))
+    }
+    if (verbose) base::cat("Conversión completada.\n")
+  } else {
+    if (verbose) base::cat(glue::glue("Iniciando la conversión paralela de {base::length(ruta_in)} archivo(s) de .grib2 a .nc utilizando {ncores} núcleos...\n"))
+    cl <- parallel::makeCluster(ncores, type = "SOCK")
+    doSNOW::registerDoSNOW(cl)
+
+    # Exportar todas las variables necesarias para los nodos
+    parallel::clusterExport(cl, varlist = c("convertirRutaWindowsAWSL", "glue", "ruta_base_script", "ruta_out_modificada", "ruta_script", "ruta_in", "verbose"))
+
+    parallel::clusterEvalQ(cl, {
       library(glue)
       library(R.utils)
       library(pbapply)
       library(doSNOW)
     })
 
-    # Usar pbapply en lugar de foreach para la barra de progreso
-    resultados <- pbapply::pblapply(1:length(ruta_in), function(i) {
+    resultados <- pbapply::pblapply(1:base::length(ruta_in), function(i) {
       rutaWSL_in_i <- convertirRutaWindowsAWSL(ruta_in[i])
-      ruta_out_modificada_i <- modificarRutaSalida(ruta_out[i])
-      rutaWSL_out_i <- convertirRutaWindowsAWSL(ruta_out_modificada_i)
-
-      print(ruta_base_script)
-      comando_i <- glue("wsl bash -c ' {ruta_script} {rutaWSL_in_i} {rutaWSL_out_i} {ruta_base_script} '")
-      system(comando_i)
-      if (verbose) glue("Archivo {ruta_in[i]} procesado.\n") else NULL
+      rutaWSL_out_i <- convertirRutaWindowsAWSL(ruta_out_modificada[i])
+      comando_i <- glue::glue("wsl bash -c ' {ruta_script} {rutaWSL_in_i} {rutaWSL_out_i} {ruta_base_script} '")
+      base::system(comando_i)
+      if (verbose) glue::glue("Archivo {ruta_in[i]} procesado.\n") else NULL
     }, cl = cl)
 
-    stopCluster(cl)
-    if (verbose) cat("Conversión paralela completada.\n")
+    parallel::stopCluster(cl)
+    if (verbose) base::cat("Conversión paralela completada.\n")
   }
 
-  tiempo_fin <- Sys.time() # Tiempo final
-  tiempo_total <- tiempo_fin - tiempo_inicio # Calcular el tiempo total de ejecución
-  if (verbose) cat(glue("Tiempo total de ejecución: {round(tiempo_total, 2)} segundos\n"))
+  tiempo_fin <- base::Sys.time()
+  tiempo_total <- tiempo_fin - tiempo_inicio
+  if (verbose) base::cat(glue::glue("Tiempo total de ejecución: {base::round(tiempo_total, 2)} segundos\n"))
 }
-
