@@ -15,7 +15,7 @@
 #' que las rutas de unidades en WSL se montan bajo "/mnt/" seguido de la letra de la unidad en minúsculas.
 convertirRutaWindowsAWSL <- function(rutaWindows) {
   # Normalizar las barras a barras hacia adelante
-  rutaNormalizada <- gsub("////", "/", rutaWindows)
+  rutaNormalizada <- gsub("\\\\", "/", rutaWindows)
 
   # Extraer la letra de la unidad y el resto de la ruta
   partes <- strsplit(rutaNormalizada, ":/", fixed = TRUE)[[1]]
@@ -23,7 +23,7 @@ convertirRutaWindowsAWSL <- function(rutaWindows) {
   restoRuta <- partes[2]
 
   # Construir la ruta de WSL usando glue
-  rutaWSL <- glue("/mnt/{letraUnidad}/{restoRuta}")
+  rutaWSL <- glue::glue("/mnt/{letraUnidad}/{restoRuta}")
 
   return(rutaWSL)
 }

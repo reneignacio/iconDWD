@@ -1,5 +1,3 @@
-
-
 #' Extraer archivos .bz2 en paralelo o secuencialmente
 #'
 #' Esta función verifica si un archivo o archivos .bz2 existen en la ruta especificada y, en caso afirmativo,
@@ -20,47 +18,53 @@
 #' @importFrom glue glue
 #' @import doParallel doSNOW R.utils parallel foreach
 
-extraerBZ2 <- function(rutas, parallel = FALSE, ncores = detectCores() - 1) {
+extraerBZ2 <- function(rutas, parallel = FALSE, ncores = parallel::detectCores() - 1) {
   requireNamespace("parallel", quietly = TRUE)
   requireNamespace("doParallel", quietly = TRUE)
+  requireNamespace("foreach", quietly = TRUE)
+  requireNamespace("glue", quietly = TRUE)
+  requireNamespace("R.utils", quietly = TRUE)
+  requireNamespace("doSNOW", quietly = TRUE)
+
+  total_archivos <- length(rutas)
 
   if (!parallel) {
     # Ejecución secuencial
-    sapply(rutas, function(ruta) {
-      if(file.exists(ruta)) {
-        bunzip2(ruta, overwrite = TRUE)
-        cat(glue("Archivo {ruta} extraído.\n"))
-      } else {
-        cat(glue("El archivo {ruta} no existe.\n"))
+    pb <- utils::txtProgressBar(min = 0, max = total_archivos, style = 3)
+    for (i in seq_along(rutas)) {
+      ruta <- rutas[i]
+      if (file.exists(ruta)) {
+        R.utils::bunzip2(ruta, overwrite = TRUE)
       }
-    })
+      utils::setTxtProgressBar(pb, i)
+    }
+    close(pb)
   } else {
     # Configuración para ejecución paralela
-    registerDoParallel(cores = ncores)
-    cl <- makeCluster(ncores)
-    clusterExport(cl, varlist = c( "glue", "R.utils"), envir = environment())
-    clusterEvalQ(cl, {
-      library(glue)
-      library(R.utils)
-      library(iconDWD)
-      library(doSNOW)
-      library(doParallel)
-      library(foreach)
-    })
+    cl <- parallel::makeCluster(ncores, type = "PSOCK", outfile = "")
+    doSNOW::registerDoSNOW(cl)
 
-    # Ejecución paralela
-    resultados <- foreach(ruta = rutas, .packages = c("glue", "R.utils","iconDWD","doParallel","doSNOW","foreach")) %dopar% {
-      if(file.exists(ruta)) {
-        bunzip2(ruta, overwrite = TRUE)
-        return(glue("Archivo {ruta} extraído.\n"))
-      } else {
-        return(glue("El archivo {ruta} no existe.\n"))
-      }
+    # Exportar la variable 'total_archivos' al clúster
+    parallel::clusterExport(cl, "total_archivos", envir = environment())
+
+    # Barra de progreso
+    pb <- utils::txtProgressBar(min = 0, max = total_archivos, style = 3)
+    progress <- function(n) {
+      utils::setTxtProgressBar(pb, n)
+      cat(glue::glue(" ({n}/{total_archivos})"), "\r")
     }
-    #cat(paste(resultados, collapse = ""))
+    opts <- list(progress = progress)
 
-    stopCluster(cl)
+    # Ejecución paralela con progreso
+    foreach::foreach(i = seq_along(rutas), .packages = c("glue", "R.utils"), .options.snow = opts) %dopar% {
+      ruta <- rutas[i]
+      if (file.exists(ruta)) {
+        R.utils::bunzip2(ruta, overwrite = TRUE)
+      }
+      progress(i)
+    }
 
+    close(pb)
+    parallel::stopCluster(cl)
   }
-
 }

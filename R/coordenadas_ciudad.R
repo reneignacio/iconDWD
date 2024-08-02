@@ -9,16 +9,19 @@
 #' se desean obtener las coordenadas. La cadena debe ser suficientemente descriptiva
 #' para ser localizada por la API de Nominatim (e.g., "Los Angeles, Chile").
 #'
-#' @return Un objeto `matrix` con las coordenadas (longitud y latitud) de la localidad.
+#' @return Un objeto `SpatVector` con el punto de las coordenadas (longitud y latitud) de la localidad.
 #'
 #' @examples
 #' coords <- coordenadas_ciudad("Los Angeles, Chile")
 #' print(coords)
+#' plet(coords)
 #'
 #' @export
 #'
 #' @import httr
 #' @importFrom jsonlite fromJSON
+#' @importFrom terra vect
+
 coordenadas_ciudad <- function(localidad) {
   # Define la URL base de la API de Nominatim
   base_url <- "https://nominatim.openstreetmap.org/search"
@@ -39,8 +42,10 @@ coordenadas_ciudad <- function(localidad) {
       lat <- as.numeric(data$lat[[1]])
       lon <- as.numeric(data$lon[[1]])
 
-      # Devuelve las coordenadas como un objeto matrix
-      return(matrix(c(lon, lat), ncol = 2))
+      # Crear un objeto SpatVector con el punto de las coordenadas
+      punto <- terra::vect(matrix(c(lon, lat), ncol = 2), type = "points", crs = "+proj=longlat +datum=WGS84")
+
+      return(punto)
     } else {
       stop("No se encontraron coordenadas para la localidad especificada.")
     }

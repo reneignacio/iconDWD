@@ -12,7 +12,7 @@ se desean obtener las coordenadas. La cadena debe ser suficientemente descriptiv
 para ser localizada por la API de Nominatim (e.g., "Los Angeles, Chile").}
 }
 \value{
-Un objeto \code{matrix} con las coordenadas (longitud y latitud) de la localidad.
+Un objeto \code{SpatVector} con el punto de las coordenadas (longitud y latitud) de la localidad.
 }
 \description{
 Esta función consulta la API de Nominatim de OpenStreetMap para obtener las
@@ -23,5 +23,6 @@ directamente con la función \code{extract} del paquete \code{terra}.
 \examples{
 coords <- coordenadas_ciudad("Los Angeles, Chile")
 print(coords)
+plet(coords)
 
 }

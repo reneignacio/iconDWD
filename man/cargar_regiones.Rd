@@ -7,25 +7,11 @@
 cargar_regiones(regiones = NULL)
 }
 \arguments{
-\item{regiones}{vector de caracteres opcional que especifica las regiones que se desean cargar. Puede incluir nombres aproximados de regiones o códigos de región directos (p. ej., "R08"). Si no se especifica, se cargará la lista completa de regiones.}
+\item{regiones}{Vector de caracteres opcional que especifica las regiones que se desean cargar.}
 }
 \value{
-Una lista de objetos \code{SpatVector}, donde cada elemento corresponde a una región cargada y está nombrado según el código de región (p. ej., "R01", "R02", etc.). Cada \code{SpatVector} también se asigna a una variable global con el mismo nombre del código de región.
+Un objeto \code{SpatVector} si se carga una sola región o todas las regiones unidas, o una lista de objetos \code{SpatVector} si se cargan múltiples regiones.
 }
 \description{
-Esta función permite cargar shapefiles simplificados de regiones específicas de Chile almacenados dentro del paquete \code{iconDWD}. La función utiliza un método de distancia de texto Jaro-Winkler para identificar la región más cercana basada en un nombre ingresado o un código de región directo, permitiendo así cierta flexibilidad en la entrada.
-}
-\details{
-La función busca archivos .shp en el directorio especificado dentro del paquete y utiliza el método de Jaro-Winkler para determinar la región más cercana a la entrada proporcionada. Si se encuentra una coincidencia válida dentro del umbral especificado, el shapefile correspondiente se carga como un objeto \code{SpatVector} y se asigna a una variable global con el nombre del código de la región. Esto facilita el acceso directo y la manipulación de los datos geográficos.
-}
-\examples{
-# Cargar todas las regiones disponibles
-todas_las_regiones <- cargar_regiones()
-
-# Cargar regiones específicas con nombres aproximados
-regiones_especificas <- cargar_regiones(c("maule", "metropolitana", "valparaiso"))
-
-# Cargar una región específica por su código
-region_R08 <- cargar_regiones("R08")
-
+Esta función permite cargar shapefiles simplificados de regiones específicas de Chile almacenados dentro del paquete \code{iconDWD}.
 }
