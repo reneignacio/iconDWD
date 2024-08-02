@@ -22,8 +22,8 @@ convertirRutaWindowsAWSL <- function(rutaWindows) {
   letraUnidad <- tolower(partes[1])
   restoRuta <- partes[2]
 
-  # Construir la ruta de WSL usando glue
-  rutaWSL <- glue::glue("/mnt/{letraUnidad}/{restoRuta}")
+  # Construir la ruta de WSL usando glue y agregar comillas para manejar espacios
+  rutaWSL <- glue::glue('"/mnt/{letraUnidad}/{restoRuta}"')
 
   return(rutaWSL)
 }
