@@ -1,21 +1,3 @@
-library(iconDWD)
-library(glue)
-library(R.utils)
-library(terra)
-library(lubridate)
-library(readr)
-library(dplyr)
-
-
-directorioBase <- "E:/ICON_FEB"
-
-rutas_bz2 <- list.files(directorioBase, pattern = "\\.bz2$", full.names = TRUE, recursive = TRUE)
-extraerBZ2(rutas = rutas_bz2, parallel = TRUE, ncores = 6)
-
-
-rutas_grib2 <- list.files(directorioBase, pattern = "\\.grib2$", full.names = TRUE, recursive = TRUE)
-ruta_script_wsl = "/home/inia/ICON_0125/transform_0125.sh"
-Grib2ANetCDF(ruta_in = rutas_grib2, parallel = T,verbose = F,ruta_script = ruta_script_wsl)
 
 
 dir<-"D:/INIA/ICON/prueba_2/20240319/18/NetCDF/"

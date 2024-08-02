@@ -1,13 +1,15 @@
-# Cargar la librería necesaria para trabajar con fechas
+
 library(lubridate)
 library(terra)
+library(RColorBrewer)
 
 # Definir la variable de interés
-variable <- "SNOW_CON"
+variable <- "T_2M"
+#puede ser CAPE_ML, SNOW_CON,SNOW_GSP, T_2M, TMAX_2M, TMIN_2M, TOT_PREC, WW
 
 # Definir el rango de fechas
-fecha_inicio <- ymd("2024-05-07")
-fecha_fin <- ymd("2024-05-07")
+fecha_inicio <- ymd("2024-05-01")
+fecha_fin <- ymd("2024-05-09")
 
 # Generar todas las fechas en el rango
 fechas <- seq(from = fecha_inicio, to = fecha_fin, by = "days")
@@ -18,7 +20,7 @@ fechas_formateadas <- format(fechas, "%Y%m%d")
 # Crear el patrón de búsqueda para los archivos
 pattern <- paste0("_(0(0[0-9]|1[0-9]|2[0-3]))_", variable, "\\.nc$")
 
-# Crear el patrón de búsqueda para los archivos que contienen "023" (precipitacion)
+# Crear el patrón de búsqueda para los archivos que contienen "023" (SNOW_CON o SNOW_GSP o TOT_PREC)
 #pattern <- paste0("_(023)_", variable, "\\.nc$")
 
 # Inicializar un vector para almacenar los resultados
@@ -27,7 +29,7 @@ archivos_seleccionados <- c()
 # Bucle para buscar archivos en cada uno de los directorios de fechas
 for (fecha in fechas_formateadas) {
   # Construir el directorio de búsqueda
-  dir_busqueda <- paste0("E:/nieve/", fecha, "/00/")
+  dir_busqueda <- paste0("E:/icon_mayo//", fecha, "/00/")
 
   # Utilizar list.files para buscar archivos que cumplan con el patrón en el directorio
   archivos_encontrados <- list.files(path = dir_busqueda, pattern = pattern, full.names = TRUE, recursive = TRUE)
@@ -37,26 +39,53 @@ for (fecha in fechas_formateadas) {
     archivos_seleccionados <- c(archivos_seleccionados, archivos_encontrados)
   }
 }
-library(terra)
-
-
 # Resultado final
 archivos_seleccionados
-
 icon<-rast(archivos_seleccionados)
-# chile<-vect("D:/crop/chile/Regional.shp")
-# chile<-project(chile,icon)
-# icon_chile<-crop(icon,chile)
 
-nuble<-vect("D:/crop/comunas/R08.shp")
+
+
+nuble<-cargar_regiones("ñuble")
+nuble<-vect("D:/crop/comunas/R16.shp")
 nuble<-project(nuble,icon)
 icon_nuble<-crop(icon,nuble,mask=F,touches=T)
-#icon_nuble<-icon_nuble-273.15
+icon_nuble<-icon_nuble-273.15
 names(icon_nuble)<-time(icon_nuble)
-icon_nuble
 animate(icon_nuble)
+
+
+# Definir la paleta de colores
+color_palette <- colorRampPalette(rev(brewer.pal(11, "RdBu")))
+
+# Ajustar el punto medio de la paleta de colores
+breaks <- seq(min(values(icon_nuble)), max(values(icon_nuble)), length.out = 100)
+col_breaks <- color_palette(length(breaks) - 1)
+
+# Crear la animación con la nueva paleta de colores
+animate(icon_nuble, col = col_breaks, breaks = breaks)
+
+
+
+
+
+
+
+
+
+
 time(icon)
 plet(icon_nuble[[23]],tiles="Streets")
+
+
+icon_chile<-terra::crop(icon,chile,mask=F,touches=T)
+icon_chile<-icon_chile-273.15
+names(icon_chile)<-time(icon_chile)
+animate(icon_chile)
+
+
+
+
+
 
 SNOW_CON
 SNOW_GSP
