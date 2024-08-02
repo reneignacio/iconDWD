@@ -37,7 +37,7 @@ sudo apt-get update
 sudo apt-get install libgdal-dev libgeos-dev libproj-dev  libnetcdf-dev libhdf5-dev gdal-bin -y
 ```
 debes copiar el contenido de  'ICON_0125.rar" dentro de una carpeta en wsl (home/...)
-Para descargar el archivo `ICON_0125.rar`, haz clic [aquí](https://github.com/reneignacio/iconDWD/raw/master/ICON_0125.rar).
+Para descargar el archivo `ICON_0125.rar`, haz clic [aquí](https://github.com/reneignacio/iconDWD/raw/main/ICON_0125.rar).
 
 ejecutar _chmod +x_ al archivo en consola, para dar permisos 
 ejemplo:
