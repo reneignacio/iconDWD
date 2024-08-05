@@ -104,6 +104,10 @@ Grib2ANetCDF <- function(ruta_in, ruta_script, parallel = FALSE, ncores = parall
       rutaWSL_in <- convertirRutaWindowsAWSL(ruta_in[i])
       rutaWSL_out <- convertirRutaWindowsAWSL(ruta_out_modificada[i])
       comando <- glue::glue("wsl bash -c ' {ruta_script} {rutaWSL_in} {rutaWSL_out} {ruta_base_script} '")
+      print(glue("la ruta de ruta_script es: {ruta_script}"))
+      print(glue("la ruta de rutaWSL_in es: {rutaWSL_in}"))
+      print(glue("la ruta de rutaWSL_out es: {rutaWSL_out}"))
+      print(glue("la ruta de ruta_base_script es: {ruta_base_script}"))
       base::system(comando)
 
       if (verbose) base::cat(glue::glue("Progreso: {i}/{base::length(ruta_in)}\n"))

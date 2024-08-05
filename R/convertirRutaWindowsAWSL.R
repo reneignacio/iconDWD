@@ -17,13 +17,16 @@ convertirRutaWindowsAWSL <- function(rutaWindows) {
   # Normalizar las barras a barras hacia adelante
   rutaNormalizada <- gsub("\\\\", "/", rutaWindows)
 
+  # Reemplazar los espacios por '\ ' para escaparlos
+  rutaNormalizada <- gsub(" ", "\\\\ ", rutaNormalizada)
+
   # Extraer la letra de la unidad y el resto de la ruta
   partes <- strsplit(rutaNormalizada, ":/", fixed = TRUE)[[1]]
   letraUnidad <- tolower(partes[1])
   restoRuta <- partes[2]
 
-  # Construir la ruta de WSL usando glue y agregar comillas para manejar espacios
-  rutaWSL <- glue::glue('"/mnt/{letraUnidad}/{restoRuta}"')
+  # Construir la ruta de WSL usando glue
+  rutaWSL <- glue::glue('/mnt/{letraUnidad}/{restoRuta}')
 
   return(rutaWSL)
 }
